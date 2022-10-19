@@ -3,7 +3,7 @@ const app = express(); //첨부한 express 라이브로 객체 생성
 app.use(express.urlencoded({extended: true}));
 
 const MongoClient = require('mongodb').MongoClient;
-MongoClient.connect('mongodb+srv://uonod1323:qwer1234@hongodb.rtsccuj.mongodb.net/?retryWrites=true&w=majority',function(에러, client){
+MongoClient.connect('mongodb+srv://uonod1323:qwer1234@hongodb.rtsccuj.mongodb.net/todoapp?retryWrites=true&w=majority',function(에러, client){
     app.listen(8989, function(){
         console.log('listen on 8989')
     });
