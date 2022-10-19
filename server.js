@@ -3,7 +3,16 @@ const app = express(); //첨부한 express 라이브로 객체 생성
 app.use(express.urlencoded({extended: true}));
 
 const MongoClient = require('mongodb').MongoClient;
+
+var db;
 MongoClient.connect('mongodb+srv://uonod1323:qwer1234@hongodb.rtsccuj.mongodb.net/todoapp?retryWrites=true&w=majority',function(에러, client){
+    if(에러) {return console.log(에러)}
+    db = client.db('todoapp'); //몽고 db에서 셋팅한 todoappDB를 가지고 와서 db라는 변수에 대입
+
+    db.collection('post').insertOne('저장할데이터', function(에러, 결과){
+        console.log('저장완료')
+    }); //todoappDB의 post폴더에 저장
+
     app.listen(8989, function(){
         console.log('listen on 8989')
     });
