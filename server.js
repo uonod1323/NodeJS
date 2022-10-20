@@ -3,20 +3,20 @@ const app = express(); //첨부한 express 라이브로 객체 생성
 app.use(express.urlencoded({extended: true}));
 
 const MongoClient = require('mongodb').MongoClient;
-
 var db;
-MongoClient.connect('mongodb+srv://uonod1323:qwer1234@hongodb.rtsccuj.mongodb.net/todoapp?retryWrites=true&w=majority',function(에러, client){
-    if(에러) {return console.log(에러)}
-    db = client.db('todoapp'); //몽고 db에서 셋팅한 todoappDB를 가지고 와서 db라는 변수에 대입
 
-    db.collection('post').insertOne('저장할데이터', function(에러, 결과){
-        console.log('저장완료')
-    }); //todoappDB의 post폴더에 저장
-
-    app.listen(8989, function(){
-        console.log('listen on 8989')
-    });
+app.listen(8989, function(){
+    console.log('listen on 8989')
 });
+
+// MongoClient.connect('mongodb+srv://uonod1323:qwer1234@hongodb.rtsccuj.mongodb.net/todoapp?retryWrites=true&w=majority',function(에러, client){
+//     if(에러) {return console.log(에러)}
+//     db = client.db('todoapp'); //todoapp 이라는 db에 연결
+
+//     db.collection('post').insertOne( {제목 : 'john', 날짜 : 20} , function(에러, 결과){
+//         console.log('저장완료')
+//     }); //todoapp 이라는 db의 post라는 파일에 자료를 저장하겠다
+// });
 
 //누군가가 /pet으로 방문을 하면 pet관련된 안내문을 띄워주자
 //함수 안에 함수 (function(){}) = 콜백함수
@@ -40,4 +40,14 @@ app.get('/', function(요청, 응답){ //슬래시를 하나만 쓰면 홈페이
 app.post('/add', function(요청, 응답){
     응답.send('전송완료');
     console.log(요청.body.title);
+    console.log(요청.body.date);
+
+    MongoClient.connect('mongodb+srv://uonod1323:qwer1234@hongodb.rtsccuj.mongodb.net/todoapp?retryWrites=true&w=majority',function(에러, client){
+        if(에러) {return console.log(에러)}
+        db = client.db('todoapp'); //todoapp 이라는 db에 연결
+
+        db.collection('post').insertOne( {제목 : 요청.body.title, 날짜 : 요청.body.date} , function(에러, 결과){
+            console.log('저장완료')
+        }); //todoapp 이라는 db의 post라는 파일에 자료를 저장하겠다
+    });
   });
