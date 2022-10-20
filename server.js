@@ -1,8 +1,8 @@
 const express = require('express'); //express 라이브러리를 첨부해주세요
 const app = express(); //첨부한 express 라이브로 객체 생성
 app.use(express.urlencoded({extended: true}));
-
 const MongoClient = require('mongodb').MongoClient;
+app.set('view engine', 'ejs');
 var db;
 
 app.listen(8989, function(){
@@ -43,4 +43,10 @@ app.post('/add', function(요청, 응답){
     db.collection('post').insertOne( {제목 : 요청.body.title, 날짜 : 요청.body.date} , function(에러, 결과){
         console.log('저장완료')
     }); //todoapp 이라는 db의 post라는 파일에 자료를 저장하겠다
+});
+
+//list로 GET요청을 보내면 .ejs 파일 보내주기
+//sendFile 과는 다릅니다
+app.get('/list', function(요청, 응답){
+    응답.render('list.ejs');
 });
