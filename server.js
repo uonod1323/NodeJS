@@ -48,5 +48,12 @@ app.post('/add', function(요청, 응답){
 //list로 GET요청을 보내면 .ejs 파일 보내주기
 //sendFile 과는 다릅니다
 app.get('/list', function(요청, 응답){
-    응답.render('list.ejs');
+
+    //post라는 곳에 저장된 모든 db데이터를 다 가지고 와서 콘솔에 출력
+    db.collection('post').find().toArray(function(에러,결과){
+        console.log(결과);
+        응답.render('list.ejs', {posts : 결과}); //결과라는 데이터가 posts라는 이름으로 list.ejs 안에 들어간다.
+    }); 
+    
+    
 });
