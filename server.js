@@ -36,13 +36,15 @@ app.get('/', function(요청, 응답){ //슬래시를 하나만 쓰면 홈페이
 //어떤 사람이 /add경로로 POST요청을 하면 ???를 해주세요
 app.post('/add', function(요청, 응답){
     응답.send('전송완료');
-    console.log(요청.body.title);
-    console.log(요청.body.date);
+    db.collection('counter').findOne({name : '게시물갯수'}, function(에러, 결과){  //counter라는 collection에서 name이 '게시물갯수' 인 데이터를 찾아주세요
+        console.log(결과.totalPost);
+        var 총게시물갯수 = 결과.totalPost;
 
-    //사용자가 전달한 데이터를 서버에 저장
-    db.collection('post').insertOne( {제목 : 요청.body.title, 날짜 : 요청.body.date} , function(에러, 결과){
-        console.log('저장완료')
-    }); //todoapp 이라는 db의 post라는 파일에 자료를 저장하겠다
+        //사용자가 전달한 데이터를 서버에 저장
+        db.collection('post').insertOne( {_id : 총게시물갯수 + 1, 제목 : 요청.body.title, 날짜 : 요청.body.date} , function(에러, 결과){
+            console.log('저장완료');
+        }); //todoapp 이라는 db의 post라는 파일에 자료를 저장하겠다
+    });
 });
 
 //list로 GET요청을 보내면 .ejs 파일 보내주기
