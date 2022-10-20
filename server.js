@@ -9,14 +9,11 @@ app.listen(8989, function(){
     console.log('listen on 8989')
 });
 
-// MongoClient.connect('mongodb+srv://uonod1323:qwer1234@hongodb.rtsccuj.mongodb.net/todoapp?retryWrites=true&w=majority',function(에러, client){
-//     if(에러) {return console.log(에러)}
-//     db = client.db('todoapp'); //todoapp 이라는 db에 연결
-
-//     db.collection('post').insertOne( {제목 : 'john', 날짜 : 20} , function(에러, 결과){
-//         console.log('저장완료')
-//     }); //todoapp 이라는 db의 post라는 파일에 자료를 저장하겠다
-// });
+//생각해 보니 전역으로 써도 아무 문제 없네...
+MongoClient.connect('mongodb+srv://uonod1323:qwer1234@hongodb.rtsccuj.mongodb.net/todoapp?retryWrites=true&w=majority',function(에러, client){
+    if(에러) {return console.log(에러)}
+    db = client.db('todoapp'); //todoapp 이라는 db에 연결
+});
 
 //누군가가 /pet으로 방문을 하면 pet관련된 안내문을 띄워주자
 //함수 안에 함수 (function(){}) = 콜백함수
@@ -42,12 +39,8 @@ app.post('/add', function(요청, 응답){
     console.log(요청.body.title);
     console.log(요청.body.date);
 
-    MongoClient.connect('mongodb+srv://uonod1323:qwer1234@hongodb.rtsccuj.mongodb.net/todoapp?retryWrites=true&w=majority',function(에러, client){
-        if(에러) {return console.log(에러)}
-        db = client.db('todoapp'); //todoapp 이라는 db에 연결
-
-        db.collection('post').insertOne( {제목 : 요청.body.title, 날짜 : 요청.body.date} , function(에러, 결과){
-            console.log('저장완료')
-        }); //todoapp 이라는 db의 post라는 파일에 자료를 저장하겠다
-    });
-  });
+    //사용자가 전달한 데이터를 서버에 저장
+    db.collection('post').insertOne( {제목 : 요청.body.title, 날짜 : 요청.body.date} , function(에러, 결과){
+        console.log('저장완료')
+    }); //todoapp 이라는 db의 post라는 파일에 자료를 저장하겠다
+});
