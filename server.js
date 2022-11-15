@@ -28,7 +28,7 @@ app.get('/beauty', function(요청, 응답){
 });
 
 app.get('/write', function(요청, 응답){ //슬래시를 하나만 쓰면 홈페이지라 생각하셈
-    응답.sendFile(__dirname + '/write.html'); //index.html 이라는 파일 불러오기
+    응답.render('write.ejs');
 });
 
 app.get('/', function(요청, 응답){ //슬래시를 하나만 쓰면 홈페이지라 생각하셈
@@ -37,7 +37,7 @@ app.get('/', function(요청, 응답){ //슬래시를 하나만 쓰면 홈페이
 
 //어떤 사람이 /add경로로 POST요청을 하면 ???를 해주세요
 app.post('/add', function(요청, 응답){
-    응답.sendFile(__dirname + '/write.html');
+    응답.render('write.ejs');
     db.collection('counter').findOne({name : '게시물갯수'}, function(에러, 결과){  //counter라는 collection에서 name이 '게시물갯수' 인 데이터를 찾아주세요
         console.log(결과.totalPost);
         var 총게시물갯수 = 결과.totalPost;
@@ -96,3 +96,78 @@ app.put('/edit', function(요청, 응답){
         응답.redirect('/list') //응답이 없으면 페이지가 멈추기 때문에 필수.
     })
 });
+
+const passport = require('passport');
+const LocalStrategy = require('passport-local').Strategy;
+const session = require('express-session');
+
+
+app.use(session({secret : '비밀코드', resave : true, saveUninitialized: false})); //app.use(미들웨어)
+app.use(passport.initialize());
+app.use(passport.session());
+
+app.get('/login', function(요청,응답){
+    응답.render('login.ejs');
+});
+
+app.post('/login', passport.authenticate('local', {
+    failureRedirect : '/fail'
+}), function(요청,응답){
+    //로그인하고 실행되는 기능을 이곳에 입력
+    응답.redirect('/') // 회원인증 성공하면 홈으로 redirect
+});
+
+//로그인했니 라는 이름으로 사용자가 만든 미들웨어를 집어넣었습니다.
+//mypage로 접속할 때 마다 로그인했니 라는 함수를 실행하고 응답을 해 줍니다.
+app.get('/mypage', 로그인했니, function(요청,응답){
+    console.log(요청.user); // mypage가 실행될 때 user의 id와 pw 데이터를 받아옴
+    응답.render('mypage.ejs', {사용자 : 요청.user});
+});
+
+// 로그인 체크하는 미들웨어 만들기
+function 로그인했니(요청, 응답, next){
+    if (요청.user){
+        next() //그냥 통과시켜주세요
+    }else{
+        응답.send('로그인안하셨는데요?')
+    }
+}
+
+
+
+
+
+
+//아이디 비번 인증하는 세부 코드
+passport.use(new LocalStrategy({
+    usernameField: 'id',
+    passwordField: 'pw',
+    session: true,
+    passReqToCallback: false,
+  }, function (입력한아이디, 입력한비번, done) {
+    //console.log(입력한아이디, 입력한비번);
+    db.collection('login').findOne({ id: 입력한아이디 }, function (에러, 결과) {
+      if (에러) return done(에러)
+  
+      if (!결과) return done(null, false, { message: '존재하지않는 아이디요' })
+      if (입력한비번 == 결과.pw) {
+        return done(null, 결과)
+      } else { 
+        return done(null, false, { message: '비번틀렸어요' })
+      }
+    })
+  }));
+
+  //세션을 저장시키는 코드(로그인 성공시 발동)
+  passport.serializeUser(function (user, done) {
+    done(null, user.id) //id를 이용해서 세션을 저장시키는 코드
+  });
+  
+  //이 세션 데이터를 가진 사람을 DB에서 찾아주세요(마이페이지 접속시 발동)
+  //deserializeUser() 로그인한 유저의 세션아이디를 바탕으로 개인정보를 DB에서 찾는 역할
+  passport.deserializeUser(function (아이디, done) {
+    //디비에서 위에 있는 user.id로 유저를 찾은 뒤에 유저 정보를
+    db.collection('login').findOne({id : 아이디}, function(에러, 결과){
+        done(null, 결과) //마이페이지 접속시 DB에서 {id:어쩌구} 인 것을 찾아서 그 결과를 보내줌.
+    })
+  }); 
