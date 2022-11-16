@@ -5,16 +5,17 @@ const MongoClient = require('mongodb').MongoClient;
 const methodOverride = require('method-override');
 app.use(methodOverride('_method'));
 app.set('view engine', 'ejs');
+require('dotenv').config();
 var db;
 
-app.listen(8989, function(){
-    console.log('listen on 8989')
-});
 
 //생각해 보니 전역으로 써도 아무 문제 없네...
-MongoClient.connect('mongodb+srv://uonod1323:qwer1234@hongodb.rtsccuj.mongodb.net/todoapp?retryWrites=true&w=majority',function(에러, client){
+MongoClient.connect(process.env.DB_URL,function(에러, client){
     if(에러) {return console.log(에러)}
     db = client.db('todoapp'); //todoapp 이라는 db에 연결
+    app.listen(process.env.PORT, function(){
+        console.log('listen on 8989')
+    });    
 });
 
 //누군가가 /pet으로 방문을 하면 pet관련된 안내문을 띄워주자
@@ -58,10 +59,14 @@ app.get('/list', function(요청, 응답){
 
     //post라는 곳에 저장된 모든 db데이터를 다 가지고 와서 콘솔에 출력
     db.collection('post').find().toArray(function(에러,결과){
-        응답.render('list.ejs', {posts : 결과}); //결과라는 데이터가 posts라는 이름으로 list.ejs 안에 들어간다.
+        응답.render('list.ejs', {posts : 결과}); //결과라는 데이터가 posts라는 이름으로 list.ejs 로 전송한다
     }); 
-    
-    
+});
+
+app.get('/search', (요청, 응답) => {
+    db.collection('post').find({제목 : 요청.query.value}).toArray((에러,결과)=>{   //toArray가 아니면 이동할 페이지로 데이터 전달이 잘 안되네...
+        응답.render('search.ejs', {posts : 결과}); //결과라는 데이터를 posts라는 이름으로 search.ejs 로 전송한다
+    })
 });
 
 app.delete('/delete', function(요청, 응답){
