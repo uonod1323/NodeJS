@@ -36,22 +36,6 @@ app.get('/', function(요청, 응답){ //슬래시를 하나만 쓰면 홈페이
     응답.sendFile(__dirname + '/index.html'); //index.html 이라는 파일 불러오기
 });
 
-//어떤 사람이 /add경로로 POST요청을 하면 ???를 해주세요
-app.post('/add', function(요청, 응답){
-    응답.render('write.ejs');
-    db.collection('counter').findOne({name : '게시물갯수'}, function(에러, 결과){  //counter라는 collection에서 name이 '게시물갯수' 인 데이터를 찾아주세요
-        console.log(결과.totalPost);
-        var 총게시물갯수 = 결과.totalPost;
-
-        //사용자가 전달한 데이터를 서버에 저장
-        db.collection('post').insertOne( {_id : 총게시물갯수 + 1, 제목 : 요청.body.title, 날짜 : 요청.body.date} , function(에러, 결과){
-            console.log('저장완료');
-            db.collection('counter').updateOne({name : '게시물갯수'},{$inc : {totalPost:1}},function(에러, 결과){
-                if(에러){return console.log(에러)}
-            })
-        });
-    });
-});
 
 //list로 GET요청을 보내면 .ejs 파일 보내주기
 //sendFile 과는 다릅니다
@@ -82,15 +66,6 @@ app.get('/search', (요청, 응답) => {
     })
 });
 
-app.delete('/delete', function(요청, 응답){
-    console.log(요청.body)
-    요청.body._id = parseInt(요청.body._id);
-    //요청 body에 담겨온 게시물번호를 가진 글을 db에서 찾아서 삭제해주세요
-    db.collection('post').deleteOne(요청.body, function(에러,결과){
-        console.log('삭제완료');
-        응답.status(200).send({message : '실패했습니다'}); //응답코드 200을 보내주세요~~~~ 200은 요청이 성공했다는뜻. 일단 무조건 성공판정 하려면 200쓰면됨
-    });
-});
 
 //detail 로 접속하면 detail.ejs 보여줌
 app.get('/detail/:id', function(요청,응답){
@@ -154,8 +129,6 @@ function 로그인했니(요청, 응답, next){
 
 
 
-
-
 //아이디 비번 인증하는 세부 코드
 passport.use(new LocalStrategy({
     usernameField: 'id',
@@ -189,3 +162,49 @@ passport.use(new LocalStrategy({
         done(null, 결과) //마이페이지 접속시 DB에서 {id:어쩌구} 인 것을 찾아서 그 결과를 보내줌.
     })
   }); 
+
+  app.post('/register', function(요청,응답){
+    db.collection('login').insertOne({ id : 요청.body.id, pw : 요청.body.pw }, function(에러,결과){
+        응답.redirect('/');
+    })
+  })
+
+  //어떤 사람이 /add경로로 POST요청을 하면 ???를 해주세요
+app.post('/add', function(요청, 응답){
+    응답.render('write.ejs');
+    db.collection('counter').findOne({name : '게시물갯수'}, function(에러, 결과){  //counter라는 collection에서 name이 '게시물갯수' 인 데이터를 찾아주세요
+        console.log(결과.totalPost);
+        var 총게시물갯수 = 결과.totalPost;
+
+        var 저장할거 = {_id : 총게시물갯수 + 1, 제목 : 요청.body.title, 날짜 : 요청.body.date, 작성자 : 요청.user._id}
+
+        //사용자가 전달한 데이터를 서버에 저장
+        db.collection('post').insertOne( 저장할거 , function(에러, 결과){
+            console.log('저장완료');
+            db.collection('counter').updateOne({name : '게시물갯수'},{$inc : {totalPost:1}},function(에러, 결과){
+                if(에러){return console.log(에러)}
+            })
+        });
+    });
+});
+
+app.delete('/delete', function(요청, 응답){
+    console.log(요청.body)
+    요청.body._id = parseInt(요청.body._id);
+
+    // _id와 작성자 둘 다 만족하는 경우에만 삭제할 데이터로 선정됨.
+    var 삭제할데이터 = { _id : 요청.body._id, 작성자 : 요청.user._id }
+
+    //요청 body에 담겨온 게시물번호를 가진 글을 db에서 찾아서 삭제해주세요
+    db.collection('post').deleteOne(삭제할데이터, function(에러,결과){
+        console.log('삭제완료');
+        if (결과) {console.log(결과)}
+        응답.status(200).send({message : '실패했습니다'}); //응답코드 200을 보내주세요~~~~ 200은 요청이 성공했다는뜻. 일단 무조건 성공판정 하려면 200쓰면됨
+    });
+});
+
+//app.use는 미들웨어를 사용하고 싶을때 씁니다
+// 슬래시 경로로 접속한 사람들은 전부 require 미들웨어(라우터)가 적용됨
+//shop.js 파일 첨부하기 (./ 는 server.js가 위치한 현재경로라는 뜻이다)
+app.use('/shop', require('./routes/shop.js'))
+app.use('/board/sub', require('./routes/board.js'))
