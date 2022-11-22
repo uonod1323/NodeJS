@@ -208,3 +208,4 @@ app.delete('/delete', function(요청, 응답){
 //shop.js 파일 첨부하기 (./ 는 server.js가 위치한 현재경로라는 뜻이다)
 app.use('/shop', require('./routes/shop.js'))
 app.use('/board/sub', require('./routes/board.js'))
+app.use('/board/sub', require('./routes/gameboard/oldgame.js'))
