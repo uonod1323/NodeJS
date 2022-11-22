@@ -63,8 +63,21 @@ app.get('/list', function(요청, 응답){
     }); 
 });
 
+//한글 최적화된 Search Inedx를 이용한 검색방법
 app.get('/search', (요청, 응답) => {
-    db.collection('post').find({제목 : 요청.query.value}).toArray((에러,결과)=>{   //toArray가 아니면 이동할 페이지로 데이터 전달이 잘 안되네...
+    var 검색조건 = [
+        {
+            $search: {
+              index: 'titleSearch',
+              text: {
+                query: 요청.query.value,
+                path: '제목'
+              }
+            }
+          }
+    ]
+    db.collection('post').aggregate(검색조건).toArray((에러,결과)=>{   //toArray가 아니면 이동할 페이지로 데이터 전달이 잘 안되네...
+        console.log(결과);
         응답.render('search.ejs', {posts : 결과}); //결과라는 데이터를 posts라는 이름으로 search.ejs 로 전송한다
     })
 });

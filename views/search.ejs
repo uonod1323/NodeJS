@@ -59,7 +59,10 @@
         var 입력한값 = $('#search-input').val();
         //주소창의 url 을 ()내의 내용으로 바꿔주십사이어인
         //주소창을 바꾸는 것 자체가 GET요청이랑 똑같은 행위입니다
-        window.location.replace(`/search?value=${입력한값}`); //버튼누르면 /search로 이동함 (GET요청함)
+
+        var 자료 = { value : $('#search-input').val()}
+        var queryString = $.param(자료);
+        window.location.replace(`/search?${queryString}`); //버튼누르면 /search로 이동함 (GET요청함)
       });
     </script>
   
@@ -70,8 +73,7 @@
             <h4>할일 제목 : <%= posts[i].제목 %></h4>
             <p>할일 마감날짜 : <%= posts[i].날짜 %></p>
             <button type="button" data-id="<%= posts[i]._id %>" class="btn btn-danger delete">삭제</button>
-        <% } %>
-        
+        <% } %>        
       </li>
     </ul>
 
