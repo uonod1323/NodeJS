@@ -13,6 +13,7 @@ var db;
 MongoClient.connect(process.env.DB_URL,function(에러, client){
     if(에러) {return console.log(에러)}
     db = client.db('todoapp'); //todoapp 이라는 db에 연결
+    db2 = client.db('gameBoard'); //gameBoard라는 db에 연결
     app.listen(process.env.PORT, function(){
         console.log('listen on 8989')
     });    
@@ -208,4 +209,4 @@ app.delete('/delete', function(요청, 응답){
 //shop.js 파일 첨부하기 (./ 는 server.js가 위치한 현재경로라는 뜻이다)
 app.use('/shop', require('./routes/shop.js'))
 app.use('/board/sub', require('./routes/board.js'))
-app.use('/board/sub', require('./routes/gameboard/oldgame.js'))
+app.use('/board/sub/oldgame', require('./routes/gameboard/oldgame.js'))
